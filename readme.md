@@ -1,6 +1,6 @@
 # ROS2 Mobile Robot
 
-A mobile robot with sensors integrated to ROS2. I
+A mobile robot with sensors integrated into ROS2. I
 
 #### Sensors
 
@@ -17,4 +17,11 @@ A mobile robot with sensors integrated to ROS2. I
 - [] Nav2
 - [] Ros2_control
 - [] Sensor fusion
+
+#### camera
+
+#### Depth camera
+
+https://github.com/Pavankv92/ROS2_mobile_robot/assets/50611671/d3dd5cc9-fc3f-4141-be1b-b1df482b873d
+
 
