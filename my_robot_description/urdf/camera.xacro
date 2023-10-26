@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!--
+        -> for compressed image ROS msgs install
+        1. sudo apt install ros-<distro>-image-transport-plugins
+        -> Rviz2 cannot handle compressed image. Install another plugin to view compressed image
+        2. sudo apt install ros-<distro>-rqt-image-view
+        -> run the node to see compressed images
+        3. ros2 run rqt_image_view rqt_image_view 
+        -> we can also convert compressed image/uncompressed to uncompressed/compressed image using
+        4. ros2 run image_transport republish compressed raw 
+        -ros-args -r in/compressed:=/camera_sensor/image_raw/compressed 
+        -r out:=/camera_sensor/uncompressed  
+    -->
+
+    <xacro:property name="camera_length" value="0.01" />
+    <xacro:property name="camera_width" value="0.1" />
+    <xacro:property name="camera_height" value="0.05" />
+
+
+    <xacro:property name="H_FOV" value="1.3962634" />
+    <xacro:property name="image_width" value="800" /> <!-- in pixels -->
+    <xacro:property name="image_height" value="400" /> <!-- in pixels -->
+    <xacro:property name="clip_near" value="0.05" /> <!-- in meters -->
+    <xacro:property name="clip_far" value="100" /> <!-- in meters -->
+     <xacro:property name="image_format" value="R8G8B8" />
+
+    <!--Noise-->
+    <!-- <xacro:property name="noise_type" value="gaussian" />
+    <xacro:property name="noise_mean" value="0.0" />
+    <xacro:property name="noise_stddev" value="0.07" /> -->
+   
+
+
+
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_height} " />
+            </geometry>
+            <material name="white"></material>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_height} " />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+
+        <xacro:box_inertia m="0.1" l="${camera_length}" w="${camera_width}" h="${camera_height}" 
+                           xyz="0 0 0" rpy="0 0 0" />
+    </link>
+
+     <joint name="base_camera_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="camera_link" />
+        <origin xyz="${(camera_length + base_length)/2.0} 0 ${3.0*(base_height)/4.0}" rpy="0 0 0" />
+    </joint>
+
+    <link name="camera_link_optical"></link>
+
+    <joint name="camera_optical_joint" type="fixed">
+        <parent link="camera_link" />
+        <child link="camera_link_optical" />
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    </joint>
+
+    <gazebo reference="camera_link">
+        <material>Gazebo/White</material>
+        <sensor name="camera_sensor" type="camera">
+            <pose>0 0 0 0 0 0</pose>
+            <visualize>true</visualize> 
+            <update_rate>10.0</update_rate>
+            <camera name="head">
+                <horizontal_fov>${H_FOV}</horizontal_fov>
+                <image>
+                    <width>${image_width}</width>
+                    <height>${image_height}</height>
+                    <format>${image_format}</format>
+                </image>
+                <clip>
+                   <near>${clip_near}</near>
+                   <far>${clip_far}</far> 
+                </clip>
+                <!-- <noise>
+                    <type>${noise_type}</type>
+                    <mean>${noise_mean}</mean>
+                    <stddev>${noise_stddev}</stddev>
+                </noise> -->
+            </camera>
+            <plugin name="camera_controller" filename="libgazebo_ros_camera.so" >
+                <frame_name>camera_link_optical</frame_name> <!-- camera link name -->
+            </plugin>
+        </sensor>
+    </gazebo>
+
+</robot>
